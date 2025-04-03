@@ -1,21 +1,19 @@
 [project]
 name = "bsutils"
-version = "0.0.2"
+version = "0.0.2post1"
 authors = [{ name = "wangzhen0518", email = "wangzhen0518@126.com" }]
 description = "A collection of basic python utilities."
 readme = "README.md"
 requires-python = ">=3.0"
-dependencies = [
-    # "ipython",
-    "pyjson5",
+dependencies = ["pyjson5"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
 ]
 
 [project.urls]
 Homepage = "https://github.com/wangzhen0518/bsutils"
 Issues = "https://github.com/wangzhen0518/bsutils/issues"
-
-[project.scripts]
-bsutils = "bsutils:main"
 
 [tool.ruff]
 line-length = 135
