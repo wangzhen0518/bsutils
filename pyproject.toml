@@ -4,7 +4,7 @@ version = "0.0.2post1"
 authors = [{ name = "wangzhen0518", email = "wangzhen0518@126.com" }]
 description = "A collection of basic python utilities."
 readme = "README.md"
-requires-python = ">=3.0"
+requires-python = ">=3.6"
 dependencies = ["pyjson5"]
 classifiers = [
     "Programming Language :: Python :: 3",
