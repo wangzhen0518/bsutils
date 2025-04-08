@@ -134,6 +134,7 @@ def get_item_num(filename: str, ignore_exception: bool = True) -> int:
             try:
                 dataset = pyjson5.load(f)  # type: ignore
             except Exception:
+                f.seek(0)
                 num = __jsonl_num(f, ignore_exception)
             else:
                 num = len(dataset)
@@ -198,6 +199,7 @@ def load_json_file(filename: str, ignore_exception: bool = True, sort: bool = Fa
             try:
                 all_content = pyjson5.load(f)  # type: ignore
             except Exception:
+                f.seek(0)
                 all_content = __load_jsonl(f, ignore_exception)
         else:  # jsonl
             all_content = __load_jsonl(f, ignore_exception)
