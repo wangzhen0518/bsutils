@@ -201,12 +201,12 @@ class Result(Generic[T, E]):
         return s
 
     def __repr__(self) -> str:
-        s = f"<Result {id(self)}\n"
+        s = f"<Result {hex(id(self))}\n"
         if isinstance(self.res, Result._Ok):
-            s += f"    Ok {id(self.res)}\n"
+            s += f"    Ok {hex(id(self.res))}\n"
             s += f"        {repr(self.res.value)}\n"
         else:
-            s += f"    Err {id(self.res)}\n"
+            s += f"    Err {hex(id(self.res))}\n"
             s += f"        {repr(self.res.error)}\n"
         s += ">"
         return s

@@ -1,6 +1,6 @@
 [project]
 name = "bsutils"
-version = "0.0.2-post2"
+version = "0.0.2-post3"
 authors = [{ name = "wangzhen0518", email = "wangzhen0518@126.com" }]
 description = "A collection of basic python utilities."
 readme = "README.md"
