@@ -1,7 +1,16 @@
+'''
+Author       : wangzhen0518 wangzhen0518@126.com
+Date         : 2025-04-03 16:25 +0800
+LastEditors  : wangzhen0518 wangzhen0518@126.com
+LastEditTime : 2025-05-09 19:26 +0800
+FilePath     : file.py
+Description  : 
+
+'''
 import os
 
 
-def pure_file_name(filename: str) -> str:
+def pure_file_name(filename: str, keep_extension: bool = False) -> str:
     """Extracts the pure file name without path and extension.
 
     This function takes a file path or full file name and returns only the base name
@@ -23,5 +32,6 @@ def pure_file_name(filename: str) -> str:
     """
 
     filename = os.path.basename(filename)
-    filename = ".".join(filename.split(".")[:-1])
+    if not keep_extension:
+        filename = ".".join(filename.split(".")[:-1])
     return filename
