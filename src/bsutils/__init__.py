@@ -1,4 +1,5 @@
 from .file import pure_file_name
+from .iterator import Iterator
 from .json import get_item_num, iter_json_file, json_to_jsonl, jsonl_to_json, load_json_file, write_json_file
 from .option import Option, Some
 from .result import Err, Ok, Result
@@ -11,6 +12,7 @@ __all__ = [
     "Result",
     "Ok",
     "Err",
+    "Iterator",
     "pure_file_name",
     "iter_json_file",
     "get_item_num",

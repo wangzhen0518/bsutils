@@ -40,3 +40,26 @@ Use `Option` to express variable which may not contain value rather than `None` 
 - `Option`: A class to express variable which may not contain value.
 - `Some`: A class to express variable which contains value.
 - `None`: Python default None.
+
+## Iterator (`bsutils.iterator`)
+A generic `Iterator` class for performing operations on iterable objects.
+
+### Features:
+- `collect`: Collect elements from the iterator into a specified container type (e.g., `list`, `set`).
+- `join`: Join all elements in the iterator using a specified operation (e.g., addition, multiplication).
+- `map`: Apply a mapping function to each element in the iterator and return a new iterator.
+- `filter`: Filter elements in the iterator based on a specified condition and return a new iterator.
+- `copy`: Create a copy of the current iterator.
+
+### Example Usage:
+```python
+from bsutils.iterator import Iterator
+
+it = Iterator(range(1, 10))
+print("List Collect:", it.copy().collect())  # Collect elements into a list
+print("Set Collect:", it.copy().collect(set))  # Collect elements into a set
+print("Add Join:", it.copy().join())  # Join elements using addition
+print("Mul Join:", it.copy().join(mul))  # Join elements using multiplication
+print("Map:", it.copy().map(lambda x: x * x).collect())  # Map elements to their squares
+print("Filter:", it.copy().filter(lambda x: x % 2 == 0).collect())  # Filter even numbers
+```
