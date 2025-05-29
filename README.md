@@ -143,3 +143,38 @@ print("Mul Join:", it.copy().join(mul))  # Join elements using multiplication
 print("Map:", it.copy().map(lambda x: x * x).collect())  # Map elements to their squares
 print("Filter:", it.copy().filter(lambda x: x % 2 == 0).collect())  # Filter even numbers
 ```
+
+---
+
+## IO (bsutils.io)
+
+The IO module provides utilities for capturing standard output (stdout) and standard error (stderr) using the OutputCatcher class.
+
+### Features:
+
+-   `OutputCatcher`: A context manager for capturing stdout and stderr.
+-   `write(data)`: Writes data to the stdout buffer.
+-   `get_stdout()`: Retrieves the captured stdout as a string.
+-   `get_stderr()`: Retrieves the captured stderr as a string.
+
+### Example Usage:
+
+```python
+from bsutils.io import OutputCapturer
+
+with OutputCapturer() as capturer:
+    print("Hello world!")
+    print("This goes to stdout")
+    import sys
+    sys.stderr.write("This goes to stderr\n")
+
+# Get the captured stdout
+output = capturer.get_stdout()
+print("Captured output:")
+print(output)
+
+# Get the captured stderr
+error = capturer.get_stderr()
+print("Captured error:")
+print(error)
+```
