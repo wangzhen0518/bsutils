@@ -146,7 +146,7 @@ print("Filter:", it.copy().filter(lambda x: x % 2 == 0).collect())  # Filter eve
 
 ---
 
-## IO (bsutils.io)
+## IO (`bsutils.io`)
 
 The IO module provides utilities for capturing standard output (stdout) and standard error (stderr) using the OutputCatcher class.
 
