@@ -239,3 +239,16 @@ from .option import Option  # noqa: E402
 
 Ok = Result[T, E].create_ok
 Err = Result[T, E].create_err
+
+
+def resultify(func: Callable[..., T]) -> Callable[..., Result[T, E]]:  # type: ignore
+    @wraps(func)
+    def wrapper(*args, **kwargs) -> Result[T, E]:
+        try:
+            # Execute the function and wrap the result in Ok
+            return Ok(func(*args, **kwargs))
+        except Exception as e:
+            # Catch exceptions and wrap them in Err
+            return cast(Result[T, E], Err(e))
+
+    return wrapper

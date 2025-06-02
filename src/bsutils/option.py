@@ -257,3 +257,22 @@ from .result import Result  # noqa: E402
 
 Some = Option[T].create_some
 Null = Option[T].create_none
+
+
+def optionalify(func: Callable[..., T], catch_exceptions: bool = True) -> Callable[..., Option[T]]:
+    @wraps(func)
+    def wrapper(*args, **kwargs) -> Option[T]:
+        if catch_exceptions:
+            try:
+                result = func(*args, **kwargs)
+            except Exception:
+                return Null()
+        else:
+            result = func(*args, **kwargs)
+
+        if result is None:
+            return Null()
+        else:
+            return Some(result)
+
+    return wrapper
