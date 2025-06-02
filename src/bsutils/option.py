@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+from functools import wraps
 from typing import Callable, Generic, TypeVar, Union
 
 from .exception import UnwrapError
@@ -23,8 +24,12 @@ class Option(Generic[T]):
         self.optb = value
 
     @classmethod
-    def create_some(cls, value: T) -> "Option[T]":
+    def create_some(cls, value: T) -> Option[T]:
         return Option(Option._Some(value))
+
+    @classmethod
+    def create_none(cls) -> Option[T]:
+        return Option(None)
 
     def is_some(self) -> bool:
         return isinstance(self.optb, Option._Some)
@@ -99,37 +104,37 @@ class Option(Generic[T]):
         else:
             return Result.create_err(f())
 
-    def and_(self, optb: "Option[U]") -> "Option[U]":
+    def and_(self, optb: Option[U]) -> Option[U]:
         if isinstance(self.optb, Option._Some):
             return optb
         else:
             return Option(None)
 
-    def and_then(self, f: Callable[[T], "Option[U]"]) -> "Option[U]":
+    def and_then(self, f: Callable[[T], Option[U]]) -> Option[U]:
         if isinstance(self.optb, Option._Some):
             return f(self.optb.value)
         else:
             return Option(None)
 
-    def filter(self, f: Callable[[T], bool]) -> "Option[T]":
+    def filter(self, f: Callable[[T], bool]) -> Option[T]:
         if isinstance(self.optb, Option._Some) and f(self.optb.value):
             return self
         else:
             return Option(None)
 
-    def or_(self, optb: "Option[T]") -> "Option[T]":
+    def or_(self, optb: Option[T]) -> Option[T]:
         if isinstance(self.optb, Option._Some):
             return self
         else:
             return optb
 
-    def or_else(self, f: Callable[[], "Option[T]"]) -> "Option[T]":
+    def or_else(self, f: Callable[[], Option[T]]) -> Option[T]:
         if isinstance(self.optb, Option._Some):
             return self
         else:
             return f()
 
-    def xor(self, optp: "Option[T]") -> "Option[T]":
+    def xor(self, optp: Option[T]) -> Option[T]:
         if isinstance(self.optb, Option._Some) and isinstance(optp.optb, Option._Some):
             return Option(None)
         elif isinstance(self.optb, Option._Some):
@@ -137,7 +142,7 @@ class Option(Generic[T]):
         else:
             return optp
 
-    def insert(self, value: T) -> "Option[T]":
+    def insert(self, value: T) -> Option[T]:
         self.optb = Option._Some(value)
         return self
 
@@ -153,7 +158,7 @@ class Option(Generic[T]):
 
     get_or_insert_default = get_or_insert_with
 
-    def take(self) -> "Option[T]":
+    def take(self) -> Option[T]:
         if isinstance(self.optb, Option._Some):
             value = self.optb.value
             self.optb = None
@@ -161,7 +166,7 @@ class Option(Generic[T]):
         else:
             return Option(None)
 
-    def take_if(self, f: Callable[[T], bool]) -> "Option[T]":
+    def take_if(self, f: Callable[[T], bool]) -> Option[T]:
         if isinstance(self.optb, Option._Some) and f(self.optb.value):
             value = self.optb.value
             self.optb = None
@@ -169,7 +174,7 @@ class Option(Generic[T]):
         else:
             return Option(None)
 
-    def replace(self, value: T) -> "Option[T]":
+    def replace(self, value: T) -> Option[T]:
         if isinstance(self.optb, Option._Some):
             old_value = self.optb.value
             self.optb = Option._Some(value)
@@ -178,34 +183,32 @@ class Option(Generic[T]):
             self.optb = Option._Some(value)
             return Option(None)
 
-    def zip(self, other: "Option[U]") -> "Option[tuple[T, U]]":
+    def zip(self, other: Option[U]) -> "Option[tuple[T, U]]":
         if isinstance(self.optb, Option._Some) and isinstance(other.optb, Option._Some):
             return Option.create_some((self.optb.value, other.optb.value))
         else:
             return Option(None)
 
-    def zip_with(self, other: "Option[U]", f: Callable[[T, U], V]) -> "Option[V]":
+    def zip_with(self, other: Option[U], f: Callable[[T, U], V]) -> "Option[V]":
         if isinstance(self.optb, Option._Some) and isinstance(other.optb, Option._Some):
             return Option.create_some(f(self.optb.value, other.optb.value))
         else:
             return Option(None)
 
-    def unzip(self) -> tuple["Option[T]", "Option[U]"]:  # type: ignore
+    def unzip(self) -> tuple[Option[T], Option[U]]:  # type: ignore
         if isinstance(self.optb, Option._Some):
-            assert isinstance(self.optb.value, tuple) and len(self.optb.value) == 2, (
-                "Option.unzip() requires a tuple of length 2"
-            )
+            assert isinstance(self.optb.value, tuple) and len(self.optb.value) == 2, "Option.unzip() requires a tuple of length 2"
             return Option.create_some(self.optb.value[0]), Option.create_some(self.optb.value[1])
         else:
             return Option(None), Option(None)
 
-    def copy(self) -> "Option[T]":
+    def copy(self) -> Option[T]:
         if isinstance(self.optb, Option._Some):
             return Option.create_some(copy.copy(self.optb.value))
         else:
             return Option(None)
 
-    def clone(self) -> "Option[T]":
+    def clone(self) -> Option[T]:
         if isinstance(self.optb, Option._Some):
             return Option.create_some(copy.deepcopy(self.optb.value))
         else:
@@ -217,7 +220,7 @@ class Option(Generic[T]):
         else:
             return Result.create_err(None)
 
-    def flatten(self) -> "Option[T]":
+    def flatten(self) -> Option[T]:
         if isinstance(self.optb, Option._Some):
             assert isinstance(self.optb.value, Option)
             return self.optb.value
@@ -250,6 +253,7 @@ class Option(Generic[T]):
             return 0
 
 
-Some = Option.create_some
-
 from .result import Result  # noqa: E402
+
+Some = Option[T].create_some
+Null = Option[T].create_none

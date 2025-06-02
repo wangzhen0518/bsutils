@@ -107,13 +107,16 @@ Use `Option` to represent variables that may or may not contain values, avoiding
 ### Example Usage:
 
 ```python
-from bsutils.option import Option, Some, None
+from bsutils.option import Option, Some, Null
 
 value = Some(42)
 if value.is_some():
     print("Value exists:", value.value)
 else:
     print("No value")
+
+null_value = Null()
+print(null_value.is_null())  # Output: True
 ```
 
 ---

@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import copy
-from typing import Callable, Generic, TypeVar, Union
+from functools import wraps
+from typing import Callable, Generic, TypeVar, Union, cast
 
 from .exception import UnwrapError
 
@@ -23,7 +24,7 @@ class Result(Generic[T, E]):
         def __init__(self, error: _E):
             self.error = error
 
-    def __init__(self, v: Union[_Ok, _Err]) -> None:
+    def __init__(self, v: Union[_Ok[T], _Err[E]]) -> None:
         self.res = v
 
     @classmethod
@@ -234,7 +235,7 @@ class Result(Generic[T, E]):
         return self.unwrap_err()
 
 
-Ok = Result.create_ok
-Err = Result.create_err
-
 from .option import Option  # noqa: E402
+
+Ok = Result[T, E].create_ok
+Err = Result[T, E].create_err
