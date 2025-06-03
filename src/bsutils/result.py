@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 from functools import wraps
-from typing import Callable, Generic, TypeVar, Union, cast
+from typing import Callable, Generic, TypeVar, Union
 
 from .exception import UnwrapError
 
@@ -47,13 +47,13 @@ class Result(Generic[T, E]):
     def is_err_and(self, f: Callable[[E], bool]):
         return isinstance(self.res, Result._Err) and f(self.res.error)
 
-    def ok(self) -> "Option[T]":
+    def ok(self) -> Option[T]:
         if isinstance(self.res, Result._Ok):
             return Option.create_some(self.res.value)
         else:
             return Option(None)
 
-    def err(self) -> "Option[E]":
+    def err(self) -> Option[E]:
         if isinstance(self.res, Result._Ok):
             return Option(None)
         else:
@@ -241,14 +241,14 @@ Ok = Result[T, E].create_ok
 Err = Result[T, E].create_err
 
 
-def resultify(func: Callable[..., T]) -> Callable[..., Result[T, E]]:  # type: ignore
+def resultify(func: Callable[..., T]) -> Callable[..., Result[T, Exception]]:
     @wraps(func)
-    def wrapper(*args, **kwargs) -> Result[T, E]:
+    def wrapper(*args, **kwargs) -> Result[T, Exception]:
         try:
             # Execute the function and wrap the result in Ok
             return Ok(func(*args, **kwargs))
         except Exception as e:
             # Catch exceptions and wrap them in Err
-            return cast(Result[T, E], Err(e))
+            return Err(e)
 
     return wrapper
