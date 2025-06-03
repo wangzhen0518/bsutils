@@ -1,4 +1,7 @@
+import os
 import sys
+import threading
+import time
 from io import StringIO
 
 
@@ -22,7 +25,7 @@ class OutputCapturer:
         __exit__(): Restores the original stdout and stderr.
     """
 
-    def __init__(self, catch_stdout: bool = True, catch_stderr: bool = True):
+    def __init__(self, catch_stdout=True, catch_stderr=True):
         """
         Initializes the OutputCatcher instance.
 
@@ -30,39 +33,31 @@ class OutputCapturer:
             catch_stdout (bool): Whether to capture stdout. Defaults to True.
             catch_stderr (bool): Whether to capture stderr. Defaults to True.
         """
-        self.stdout_buffer = StringIO()
-        self.stderr_buffer = StringIO()
-        self.old_stdout = None
-        self.old_stderr = None
         self.catch_stdout = catch_stdout
         self.catch_stderr = catch_stderr
 
-    def write(self, data):
-        """
-        Writes data to the stdout buffer.
+        self.fd_stdout = StringIO()
+        self.fd_stderr = StringIO()
 
-        Args:
-            data (str): The data to write to the buffer.
-        """
-        self.stdout_buffer.write(data)
+        self.old_fd_stdout = -1
+        self.old_fd_stderr = -1
 
-    def get_stdout(self):
-        """
-        Retrieves the captured stdout as a string.
+        self.stdout_r, self.stdout_w = -1, -1
+        self.stderr_r, self.stderr_w = -1, -1
+        self.stdout_thread = None
+        self.stderr_thread = None
+        self.stop_threads = False
 
-        Returns:
-            str: The captured stdout.
-        """
-        return self.stdout_buffer.getvalue()
-
-    def get_stderr(self):
-        """
-        Retrieves the captured stderr as a string.
-
-        Returns:
-            str: The captured stderr.
-        """
-        return self.stderr_buffer.getvalue()
+    def _fd_reader(self, fd, buffer):
+        """从文件描述符读取数据的线程函数"""
+        while not self.stop_threads:
+            try:
+                data = os.read(fd, 4096)
+                if not data:  # EOF
+                    break
+                buffer.write(data.decode(errors="replace"))
+            except (BlockingIOError, OSError):
+                time.sleep(0.1)
 
     def __enter__(self):
         """
@@ -71,15 +66,28 @@ class OutputCapturer:
         Returns:
             OutputCatcher: The current instance of OutputCatcher.
         """
-        self.old_stdout = sys.stdout
-        self.old_stderr = sys.stderr
+        self.old_fd_stdout = os.dup(sys.stdout.fileno())
+        self.old_fd_stderr = os.dup(sys.stderr.fileno())
+        self.stop_threads = False
+
         if self.catch_stdout:
-            sys.stdout = self.stdout_buffer
+            self.stdout_r, self.stdout_w = os.pipe()
+            os.dup2(self.stdout_w, sys.stdout.fileno())
+
+            self.stdout_thread = threading.Thread(target=self._fd_reader, args=(self.stdout_r, self.fd_stdout))
+            self.stdout_thread.daemon = True
+            self.stdout_thread.start()
+
         if self.catch_stderr:
-            sys.stderr = self.stderr_buffer
+            self.stderr_r, self.stderr_w = os.pipe()
+            os.dup2(self.stderr_w, sys.stderr.fileno())
+
+            self.stderr_thread = threading.Thread(target=self._fd_reader, args=(self.stderr_r, self.fd_stderr))
+            self.stderr_thread.daemon = True
+            self.stderr_thread.start()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_value, traceback):
         """
         Restores the original stdout and stderr.
 
@@ -91,9 +99,51 @@ class OutputCapturer:
         Returns:
             bool: False to propagate exceptions, if any.
         """
-        sys.stdout = self.old_stdout
-        sys.stderr = self.old_stderr
+
+        self.stop_threads = True
+
+        if self.catch_stdout:
+            os.close(self.stdout_w)
+        if self.catch_stderr:
+            os.close(self.stderr_w)
+
+        if self.stdout_thread:
+            self.stdout_thread.join(timeout=0.1)
+        if self.stderr_thread:
+            self.stderr_thread.join(timeout=0.1)
+
+        if self.catch_stdout:
+            os.close(self.stdout_r)
+        if self.catch_stderr:
+            os.close(self.stderr_r)
+
+        os.dup2(self.old_fd_stdout, sys.stdout.fileno())
+        os.dup2(self.old_fd_stderr, sys.stderr.fileno())
+
+        os.close(self.old_fd_stdout)
+        os.close(self.old_fd_stderr)
+
         return False
+
+    def get_stdout(self):
+        """
+        Retrieves the captured stdout as a string.
+
+        Returns:
+            str: The captured stdout.
+        """
+        fd_out = self.fd_stdout.getvalue()
+        return fd_out
+
+    def get_stderr(self):
+        """
+        Retrieves the captured stderr as a string.
+
+        Returns:
+            str: The captured stderr.
+        """
+        fd_err = self.fd_stderr.getvalue()
+        return fd_err
 
 
 def demo():
