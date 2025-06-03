@@ -99,7 +99,7 @@ class Result(Generic[T, E]):
         else:
             raise UnwrapError(f"{msg}: {self.res.error}")
 
-    def unwarp(self) -> T:
+    def unwrap(self) -> T:
         if isinstance(self.res, Result._Ok):
             return self.res.value
         else:
@@ -228,7 +228,7 @@ class Result(Generic[T, E]):
 
     @property
     def value(self):
-        return self.unwarp()
+        return self.unwrap()
 
     @property
     def error(self):
