@@ -12,6 +12,7 @@ _T = TypeVar("_T")
 U = TypeVar("U")
 V = TypeVar("V")
 
+
 class _Some(Generic[T]):
     def __init__(self, value: T) -> None:
         super().__init__()
@@ -19,7 +20,6 @@ class _Some(Generic[T]):
 
 
 class Option(Generic[T]):
-
     def __init__(self, value: Union[_Some, None]) -> None:
         super().__init__()
         self.optb = value
@@ -254,10 +254,11 @@ class Option(Generic[T]):
             return 0
 
 
-from .result import Result  # noqa: E402
-
 Some = Option[T].create_some
 Null = Option[T].create_none
+
+
+from .result import Result  # noqa: E402
 
 
 def optionalify(func: Callable[..., T], catch_exceptions: bool = True) -> Callable[..., Option[T]]:

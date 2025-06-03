@@ -237,10 +237,11 @@ class Result(Generic[T, E]):
         return self.unwrap_err()
 
 
-from .option import Option, Some  # noqa: E402
-
 Ok = Result[T, E].create_ok
 Err = Result[T, E].create_err
+
+
+from .option import Option, Some  # noqa: E402
 
 
 def resultify(func: Callable[..., T]) -> Callable[..., Result[T, Exception]]:
