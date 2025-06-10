@@ -21,7 +21,7 @@ class JsonType(enum.Enum):
     Jsonl = "jsonl"
 
 
-def check_json_file_type(filename: str) -> JsonType:
+def check_json_file_type(filename: str, type_: Literal["json", "jsonl"] | None = None) -> JsonType:
     """
     Checks if a filename has a valid JSON or JSONL extension.
 
@@ -40,14 +40,19 @@ def check_json_file_type(filename: str) -> JsonType:
         >>> check_json_file_type("invalid.txt")
         ValueError: Unknown file type .txt: invalid.txt
     """
-    ext = filename.split(".")[-1]
-    if ext not in {"json", "jsonl"}:
-        raise ValueError(f"Unknown file type .{ext}: {filename}")
+    if type_ is None:
+        ext_ = filename.split(".")[-1]
     else:
-        return JsonType(ext)
+        ext_ = type_
+    if ext_ not in {"json", "jsonl"}:
+        raise ValueError(f"Unknown file type .{ext_}: {filename}")
+    else:
+        return JsonType(ext_)
 
 
-def iter_json_file(filename: str, ignore_exception: bool = True) -> Generator[dict, None, None]:
+def iter_json_file(
+    filename: str, ignore_exception: bool = True, type_: Literal["json", "jsonl"] | None = None
+) -> Generator[dict, None, None]:
     """
     Iterates over items in a JSON/JSONL file, yielding one dictionary at a time.
 
@@ -80,9 +85,9 @@ def iter_json_file(filename: str, ignore_exception: bool = True) -> Generator[di
             else:
                 yield item
 
-    ext = check_json_file_type(filename)
+    ext_ = check_json_file_type(filename, type_)
     with open(filename, "r", encoding="utf8") as f:
-        if ext == "json":
+        if ext_ == "json":
             try:
                 content = pyjson5.load(f)  # type: ignore
             except Exception:
@@ -98,7 +103,7 @@ def iter_json_file(filename: str, ignore_exception: bool = True) -> Generator[di
             yield from _iter_jsonl(f, ignore_exception)
 
 
-def get_item_num(filename: str, ignore_exception: bool = True) -> int:
+def get_item_num(filename: str, ignore_exception: bool = True, type_: Literal["json", "jsonl"] | None = None) -> int:
     """
     Counts items in a JSON/JSONL file.
 
@@ -128,9 +133,9 @@ def get_item_num(filename: str, ignore_exception: bool = True) -> int:
                 raise e
         return num
 
-    ext = check_json_file_type(filename)
+    ext_ = check_json_file_type(filename, type_)
     with open(filename) as f:
-        if ext is JsonType.Json:
+        if ext_ is JsonType.Json:
             try:
                 dataset = pyjson5.load(f)  # type: ignore
             except Exception:
@@ -144,7 +149,13 @@ def get_item_num(filename: str, ignore_exception: bool = True) -> int:
     return num
 
 
-def load_json_file(filename: str, ignore_exception: bool = True, sort: bool = False, sort_key: Optional[Callable] = None):
+def load_json_file(
+    filename: str,
+    ignore_exception: bool = True,
+    type_: Literal["json", "jsonl"] | None = None,
+    sort: bool = False,
+    sort_key: Optional[Callable] = None,
+):
     """Load and parse JSON or JSONL file with optional sorting and error handling.
 
     Args:
@@ -193,9 +204,9 @@ def load_json_file(filename: str, ignore_exception: bool = True, sort: bool = Fa
             all_content.append(content)
         return all_content
 
-    ext = check_json_file_type(filename)
+    ext_ = check_json_file_type(filename, type_)
     with open(filename) as f:
-        if ext is JsonType.Json:
+        if ext_ is JsonType.Json:
             try:
                 all_content = pyjson5.load(f)  # type: ignore
             except Exception:
@@ -215,10 +226,10 @@ def load_json_file(filename: str, ignore_exception: bool = True, sort: bool = Fa
 def write_json_file(
     data: Iterable,
     filename: str,
+    type_: Optional[Literal["json", "jsonl"]] = None,
     transfrom: Optional[Callable] = None,
     sort: bool = False,
     sort_key: Optional[Callable] = None,
-    write_type: Optional[Literal["json", "jsonl"]] = None,
 ):
     """
     Writes data to a JSON/JSONL file with optional transformations and sorting.
@@ -253,19 +264,16 @@ def write_json_file(
     if sort:
         if sort_key is not None:
             if not isinstance(data, Iterable):
-                raise ValueError(f"data must be iterable when using sort, but now its type is {type(data)}")
+                raise ValueError(f"data must be iterable when using sort, but now its type is {type_(data)}")
             data = sorted(data, key=sort_key)
         else:
             raise ValueError("Using sort but sort_key is None.")
 
-    if write_type is None:
-        ext = check_json_file_type(filename)
-    else:
-        ext = JsonType(write_type)
+    ext_ = check_json_file_type(filename, type_)
 
     os.makedirs(os.path.dirname(filename), exist_ok=True)
 
-    if ext is JsonType.Json:
+    if ext_ is JsonType.Json:
         with open(filename, "w", encoding="utf8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
     else:
@@ -294,7 +302,7 @@ def json_to_jsonl(src_file: str, tgt_file: Optional[str]):
     content = load_json_file(src_file)
     if tgt_file is None:
         tgt_file = os.path.join(os.path.dirname(src_file), pure_file_name(src_file) + ".jsonl")
-    write_json_file(content, tgt_file, write_type="jsonl")
+    write_json_file(content, tgt_file, type_="jsonl")
 
 
 def jsonl_to_json(src_file: str, tgt_file: Optional[str]):
@@ -316,4 +324,4 @@ def jsonl_to_json(src_file: str, tgt_file: Optional[str]):
     content = load_json_file(src_file)
     if tgt_file is None:
         tgt_file = os.path.join(os.path.dirname(src_file), pure_file_name(src_file) + ".json")
-    write_json_file(content, tgt_file, write_type="json")
+    write_json_file(content, tgt_file, type_="json")
