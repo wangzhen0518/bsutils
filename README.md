@@ -181,3 +181,7 @@ error = capturer.get_stderr()
 print("Captured error:")
 print(error)
 ```
+
+# Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=wangzhen0518/bsutils&type=Date)](https://www.star-history.com/#wangzhen0518/bsutils&Date)
