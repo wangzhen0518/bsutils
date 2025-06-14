@@ -184,4 +184,10 @@ print(error)
 
 # Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=wangzhen0518/bsutils&type=Date)](https://www.star-history.com/#wangzhen0518/bsutils&Date)
+<a href="https://www.star-history.com/#wangzhen0518/bsutils&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=wangzhen0518/bsutils&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=wangzhen0518/bsutils&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=wangzhen0518/bsutils&type=Date" />
+ </picture>
+</a>
