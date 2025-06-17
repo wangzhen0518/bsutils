@@ -182,6 +182,11 @@ print("Captured error:")
 print(error)
 ```
 
+# TODO
+
+-   [ ] Thread safe output capturer.
+-   [ ] Capture python level and c extension level output and error separately.
+
 # Star History
 
 <a href="https://www.star-history.com/#wangzhen0518/bsutils&Date">
