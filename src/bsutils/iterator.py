@@ -46,7 +46,7 @@ class Iterator(Generic[T]):
         """
         return container_type(self.iter_handler)
 
-    def join(self, join_op: Callable[[T, T], T] = add) -> T | None:
+    def join(self, join_op: Callable[[T, T], T] = add, catch_exception: bool = False) -> T | None:
         """
         Joins all elements in the iterator using a specified operation.
 
@@ -56,9 +56,20 @@ class Iterator(Generic[T]):
         Returns:
             T | None: The result of joining all elements. Returns None if the iterator is empty.
         """
-        res: T | None = next(self.iter_handler, None)  # type: ignore
+
+        def get_next_item(catch_exception: bool):
+            if catch_exception:
+                try:
+                    item = next(self.iter_handler, None)
+                except Exception:
+                    return None
+            else:
+                item = next(self.iter_handler, None)
+            return item
+
+        res = get_next_item(catch_exception)
         if res is not None:
-            while item := next(self.iter_handler, None):
+            while item := get_next_item(catch_exception):
                 res = join_op(res, item)
         return res
 
