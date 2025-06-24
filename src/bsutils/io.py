@@ -3,6 +3,7 @@ import sys
 import threading
 import time
 from io import StringIO
+from typing import Callable
 
 
 class OutputCapturer:
@@ -144,6 +145,25 @@ class OutputCapturer:
         """
         fd_err = self.fd_stderr.getvalue()
         return fd_err
+
+
+def open_and_read(filename: str, io_flag: str = "r", read_func: Callable | None = None, **kwargs):
+    with open(filename, io_flag) as f:
+        if read_func is not None:
+            res = read_func(f, kwargs)
+        else:
+            res = f.read()
+
+    return res
+
+
+def open_and_write(filename: str, write_content, io_flag: str = "w", write_func: Callable | None = None, **kwargs):
+    with open(filename, io_flag) as f:
+        if write_func is not None:
+            res = write_func(write_content, f, kwargs)
+        else:
+            res = f.write(write_content)
+    return res
 
 
 def demo():
