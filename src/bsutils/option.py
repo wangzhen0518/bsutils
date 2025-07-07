@@ -274,6 +274,8 @@ def optionalify(func: Callable[..., T], catch_exceptions: bool = True) -> Callab
 
         if result is None:
             return Null()
+        elif isinstance(result, Option):
+            return result
         else:
             return Some(result)
 

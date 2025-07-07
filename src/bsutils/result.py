@@ -249,7 +249,11 @@ def resultify(func: Callable[..., T]) -> Callable[..., Result[T, Exception]]:
     def wrapper(*args, **kwargs) -> Result[T, Exception]:
         try:
             # Execute the function and wrap the result in Ok
-            return Ok(func(*args, **kwargs))
+            res = func(*args, **kwargs)
+            if isinstance(res, Result):
+                return res
+            else:
+                return Ok(res)
         except Exception as e:
             # Catch exceptions and wrap them in Err
             return Err(e)
