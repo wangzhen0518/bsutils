@@ -107,6 +107,19 @@ class Iterator(Generic[T]):
         self.iter_handler, new_iter_handler = itertools.tee(self.iter_handler)
         return Iterator(new_iter_handler)
 
+    def count(self) -> int:
+        """
+        Counts the number of elements in the iterator.
+
+        Returns:
+            int: The total number of elements in the iterator.
+
+        Note:
+            This operation consumes the iterator. After calling this method,
+            the iterator will be exhausted and cannot be used again.
+        """
+        return sum(1 for _ in self.iter_handler)
+
 
 def demo():
     """
