@@ -1,6 +1,6 @@
 # bsutils: Basic Python Utilities
 
-![Downloads](https://img.shields.io/pypi/dm/bsutils.svg?style=flat)
+[![PyPI Downloads](https://static.pepy.tech/badge/bsutils)](https://pepy.tech/projects/bsutils)
 
 A collection of basic Python utilities designed to simplify common tasks.
 
