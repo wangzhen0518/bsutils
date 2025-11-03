@@ -186,6 +186,7 @@ print(error)
 
 -   [ ] Thread safe output capturer.
 -   [ ] Capture python level and c extension level output and error separately.
+-   [ ] Iterator: `skip(n)`, `take(n)`, etc.
 
 # Star History
 
