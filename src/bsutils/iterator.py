@@ -1,6 +1,6 @@
 import itertools
 from collections.abc import Callable, Collection, Iterable
-from collections.abc import Iterator as TypeIterator
+from collections.abc import Iterator as DefaultIterator
 from operator import add, mul
 from typing import Any, Generic, TypeVar
 
@@ -21,19 +21,18 @@ class Iterator(Generic[T]):
         T: The type of elements in the iterator.
     """
 
-    def __init__(self, iterable: Iterable[T] | TypeIterator[T], *, catch_exception: bool = False):
+    def __init__(self, iterable: Iterable[T] | DefaultIterator[T], *, catch_exception: bool = False):
         """
         Initializes the Iterator object.
 
         Args:
-            iterable (Iterable[T] | TypeIterator[T]): An iterable or iterator object.
+            iterable (Iterable[T] | DefaultIterator[T]): An iterable or iterator object.
 
         Raises:
             AssertionError: If the input is not an iterable.
         """
         assert isinstance(iterable, Iterable), "Input must be an iterable"
-        self.iter_handler = iter(iterable)
-        self.index = 0
+        self.iter_handler: DefaultIterator[T] = iter(iterable)
         self.catch_exception = catch_exception
 
     def __iter__(self):
