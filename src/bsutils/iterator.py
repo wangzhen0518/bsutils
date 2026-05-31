@@ -1,6 +1,8 @@
 import itertools
+from collections.abc import Callable, Collection, Iterable
+from collections.abc import Iterator as TypeIterator
 from operator import add, mul
-from typing import Callable, Generic, Iterable, TypeVar, Collection, Any, Iterator as TypeIterator
+from typing import Any, Generic, TypeVar
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -19,7 +21,7 @@ class Iterator(Generic[T]):
         T: The type of elements in the iterator.
     """
 
-    def __init__(self, iterable: Iterable[T] | TypeIterator[T]):
+    def __init__(self, iterable: Iterable[T] | TypeIterator[T], *, catch_exception: bool = False):
         """
         Initializes the Iterator object.
 
@@ -32,6 +34,33 @@ class Iterator(Generic[T]):
         assert isinstance(iterable, Iterable), "Input must be an iterable"
         self.iter_handler = iter(iterable)
         self.index = 0
+        self.catch_exception = catch_exception
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        item = self._get_next_item()
+        if item is None:
+            raise StopIteration
+        return item
+
+    def _get_next_item(self):
+        if self.catch_exception:
+            try:
+                item = next(self.iter_handler, None)
+            except Exception:
+                return None
+        else:
+            item = next(self.iter_handler, None)
+        return item
+
+    def set_catch_exception(self, catch_exception: bool) -> bool:
+        catch_exception, self.catch_exception = self.catch_exception, catch_exception
+        return catch_exception
+
+    def get_catch_exception(self) -> bool:
+        return self.catch_exception
 
     def collect(self, container_type: Callable[[Iterable[T]], C] = list[T]) -> C:
         """
@@ -56,21 +85,15 @@ class Iterator(Generic[T]):
         Returns:
             T | None: The result of joining all elements. Returns None if the iterator is empty.
         """
+        catch_exception = self.set_catch_exception(catch_exception)
 
-        def get_next_item(catch_exception: bool):
-            if catch_exception:
-                try:
-                    item = next(self.iter_handler, None)
-                except Exception:
-                    return None
-            else:
-                item = next(self.iter_handler, None)
-            return item
-
-        res = get_next_item(catch_exception)
+        res = self._get_next_item()
         if res is not None:
-            while item := get_next_item(catch_exception):
+            while item := self._get_next_item():
                 res = join_op(res, item)
+
+        self.set_catch_exception(catch_exception)
+
         return res
 
     def map(self, map_fn: Callable[[T], U]) -> "Iterator[U]":
@@ -133,6 +156,8 @@ def demo():
     print("Map:", it.copy().map(lambda x: x * x).collect())
     print("Filter:", it.copy().filter(lambda x: x % 2 == 0).collect())
     print("Map & Filter:", it.copy().map(lambda x: x * x).filter(lambda x: x % 2 == 0).collect())
+    for item in it.copy():
+        print(item)
 
 
 if __name__ == "__main__":
