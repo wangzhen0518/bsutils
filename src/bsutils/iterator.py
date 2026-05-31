@@ -115,7 +115,7 @@ class Iterator(Generic[T]):
         """
         return container_type(self.iter_handler)
 
-    def join(self, join_op: Callable[[T, T], T] = add, catch_exception: bool = False) -> T | None:
+    def join(self, join_op: Callable[[T, T], T] = add, catch_exception: bool | None = None) -> T | None:
         """
         Joins all elements in the iterator using a specified operation.
 
@@ -125,14 +125,16 @@ class Iterator(Generic[T]):
         Returns:
             T | None: The result of joining all elements. Returns None if the iterator is empty.
         """
-        catch_exception = self.set_catch_exception(catch_exception)
+        if catch_exception is not None:
+            catch_exception = self.set_catch_exception(catch_exception)
 
         res = self._get_next_item()
         if res is not None:
             while item := self._get_next_item():
                 res = join_op(res, item)
 
-        self.set_catch_exception(catch_exception)
+        if catch_exception is not None:
+            self.set_catch_exception(catch_exception)
 
         return res
 
@@ -182,12 +184,13 @@ class Iterator(Generic[T]):
         Skip the first n elements in place and returns self.
 
         Args:
-            n (int): The number of elements to skip.
+            n (int): The number of elements to skip. If n is less than or equal to 0, no elements are skipped.
 
         Returns:
             Iterator[T]: self with the first n elements skipped.
         """
-        self.iter_handler = itertools.islice(self.iter_handler, n, None)  # type: ignore
+        if n > 0:
+            self.iter_handler = itertools.islice(self.iter_handler, n, None)  # type: ignore
         return self
 
     def take(self, n: int) -> "Iterator[T]":
@@ -200,7 +203,8 @@ class Iterator(Generic[T]):
         Returns:
             Iterator[T]: self with only the first n elements remaining.
         """
-        self.iter_handler = itertools.islice(self.iter_handler, n)  # type: ignore
+        if n > 0:
+            self.iter_handler = itertools.islice(self.iter_handler, n)  # type: ignore
         return self
 
     def count(self) -> int:
