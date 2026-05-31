@@ -21,7 +21,7 @@ class Iterator(Generic[T]):
         T: The type of elements in the iterator.
     """
 
-    def __init__(self, iterable: Iterable[T] | DefaultIterator[T], *, catch_exception: bool = False):
+    def __init__(self, iterable: Iterable[T] | DefaultIterator[T], catch_exception: bool = False):
         """
         Initializes the Iterator object.
 
@@ -175,7 +175,7 @@ class Iterator(Generic[T]):
             Iterator[T]: A new iterator containing the same remaining elements.
         """
         self.iter_handler, new_iter_handler = itertools.tee(self.iter_handler)
-        return Iterator(new_iter_handler)
+        return Iterator(new_iter_handler, self.catch_exception)
 
     def skip(self, n: int) -> "Iterator[T]":
         """
