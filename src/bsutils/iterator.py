@@ -95,29 +95,31 @@ class Iterator(Generic[T]):
 
         return res
 
-    def map(self, map_fn: Callable[[T], U]) -> "Iterator[U]":
+    def map(self, map_fn: Callable[[T], U]) -> "Iterator":
         """
-        Applies a mapping function to each element in the iterator and returns a new Iterator.
+        Applies a mapping function to each element in the iterator and returns self.
 
         Args:
             map_fn (Callable[[T], U]): A function to transform each element.
 
         Returns:
-            Iterator[U]: A new iterator containing the mapped elements.
+            Iterator: self with the mapped iterator handler.
         """
-        return Iterator(map(map_fn, self.iter_handler))
+        self.iter_handler = map(map_fn, self.iter_handler)  # type: ignore
+        return self
 
     def filter(self, filter_fn: Callable[[T], bool]) -> "Iterator[T]":
         """
-        Filters elements in the iterator based on a specified condition and returns a new Iterator.
+        Filters elements in the iterator based on a specified condition and returns self.
 
         Args:
             filter_fn (Callable[[T], bool]): A function to determine whether an element should be kept.
 
         Returns:
-            Iterator[T]: A new iterator containing the filtered elements.
+            Iterator[T]: self with the filtered iterator handler.
         """
-        return Iterator(filter(filter_fn, self.iter_handler))
+        self.iter_handler = filter(filter_fn, self.iter_handler)  # type: ignore
+        return self
 
     def copy(self) -> "Iterator[T]":
         """
