@@ -36,15 +36,38 @@ class Iterator(Generic[T]):
         self.catch_exception = catch_exception
 
     def __iter__(self):
+        """
+        Returns self as the iterator object.
+
+        Returns:
+            Iterator[T]: self, enabling the iterator protocol.
+        """
         return self
 
-    def __next__(self):
+    def __next__(self) -> T:
+        """
+        Returns the next item from the iterator.
+
+        Returns:
+            T: The next element.
+
+        Raises:
+            StopIteration: If the iterator is exhausted.
+        """
         item = self._get_next_item()
         if item is None:
             raise StopIteration
         return item
 
-    def _get_next_item(self):
+    def _get_next_item(self) -> T | None:
+        """
+        Retrieves the next item from the underlying iterator handler.
+
+        If catch_exception is enabled, returns None on any exception instead of propagating it.
+
+        Returns:
+            T | None: The next element, or None if the iterator is exhausted or an exception occurred.
+        """
         if self.catch_exception:
             try:
                 item = next(self.iter_handler, None)
@@ -55,10 +78,28 @@ class Iterator(Generic[T]):
         return item
 
     def set_catch_exception(self, catch_exception: bool) -> bool:
+        """
+        Sets the catch_exception flag and returns the previous value.
+
+        This method swaps the current catch_exception state with the provided value,
+        allowing temporary changes that can be reverted later.
+
+        Args:
+            catch_exception (bool): The new value for the catch_exception flag.
+
+        Returns:
+            bool: The previous catch_exception value.
+        """
         catch_exception, self.catch_exception = self.catch_exception, catch_exception
         return catch_exception
 
     def get_catch_exception(self) -> bool:
+        """
+        Returns the current catch_exception flag value.
+
+        Returns:
+            bool: True if exceptions are caught silently, False otherwise.
+        """
         return self.catch_exception
 
     def collect(self, container_type: Callable[[Iterable[T]], C] = list[T]) -> C:
@@ -123,10 +164,15 @@ class Iterator(Generic[T]):
 
     def copy(self) -> "Iterator[T]":
         """
-        Creates a copy of the current iterator and returns a new Iterator.
+        Creates a copy of the current iterator using itertools.tee.
+
+        The tee operation splits the iterator into two, allowing independent iteration.
+        Note that tee may need to buffer items if the two copies are advanced at
+        different rates. After calling this method, the original iterator still works
+        but both share underlying state until fully consumed.
 
         Returns:
-            Iterator[T]: A new iterator containing the same elements as the original.
+            Iterator[T]: A new iterator containing the same remaining elements.
         """
         self.iter_handler, new_iter_handler = itertools.tee(self.iter_handler)
         return Iterator(new_iter_handler)
