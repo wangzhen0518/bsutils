@@ -132,6 +132,8 @@ A generic `Iterator` class for performing operations on iterable objects.
 -   `map`: Apply a mapping function to each element in the iterator and return a new iterator.
 -   `filter`: Filter elements in the iterator based on a specified condition and return a new iterator.
 -   `copy`: Create a copy of the current iterator.
+-   `skip`: Skip the first n elements and return a new iterator.
+-   `take`: Take the first n elements and return a new iterator.
 
 ### Example Usage:
 
@@ -186,7 +188,7 @@ print(error)
 
 -   [ ] Thread safe output capturer.
 -   [ ] Capture python level and c extension level output and error separately.
--   [ ] Iterator: `skip(n)`, `take(n)`, etc.
+-   [x] Iterator: `skip(n)`, `take(n)`, etc.
 
 # Star History
 

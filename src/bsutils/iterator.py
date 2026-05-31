@@ -130,6 +130,32 @@ class Iterator(Generic[T]):
         self.iter_handler, new_iter_handler = itertools.tee(self.iter_handler)
         return Iterator(new_iter_handler)
 
+    def skip(self, n: int) -> "Iterator[T]":
+        """
+        Skip the first n elements in place and returns self.
+
+        Args:
+            n (int): The number of elements to skip.
+
+        Returns:
+            Iterator[T]: self with the first n elements skipped.
+        """
+        self.iter_handler = itertools.islice(self.iter_handler, n, None)  # type: ignore
+        return self
+
+    def take(self, n: int) -> "Iterator[T]":
+        """
+        Take only the first n elements in place and returns self.
+
+        Args:
+            n (int): The number of elements to take.
+
+        Returns:
+            Iterator[T]: self with only the first n elements remaining.
+        """
+        self.iter_handler = itertools.islice(self.iter_handler, n)  # type: ignore
+        return self
+
     def count(self) -> int:
         """
         Counts the number of elements in the iterator.
@@ -156,6 +182,10 @@ def demo():
     print("Map:", it.copy().map(lambda x: x * x).collect())
     print("Filter:", it.copy().filter(lambda x: x % 2 == 0).collect())
     print("Map & Filter:", it.copy().map(lambda x: x * x).filter(lambda x: x % 2 == 0).collect())
+    print("Skip 3:", it.copy().skip(3).collect())
+    print("Take 3:", it.copy().take(3).collect())
+    print("Skip 2 & Take 3:", it.copy().skip(2).take(3).collect())
+
     for item in it.copy():
         print(item)
 
